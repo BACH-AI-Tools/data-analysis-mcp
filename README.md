@@ -37,31 +37,31 @@ pip install -r requirements.txt
 python main.py
 ```
 
-服务器将在 `http://localhost:3000` 启动。
+服务器将在 `http://localhost:8000` 启动。
 
 ### 访问 API 文档
 
 启动后访问：
-- **Swagger UI**: http://localhost:3000/docs
-- **ReDoc**: http://localhost:3000/redoc
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
 ## API 端点
 
 ### 1. 根端点
 ```
-GET http://localhost:3000/
+GET http://localhost:8000/
 ```
 返回服务器信息和可用端点
 
 ### 2. SSE 连接端点
 ```
-GET http://localhost:3000/sse
+GET http://localhost:8000/sse
 ```
 建立 Server-Sent Events 连接，接收服务器推送的消息
 
 ### 3. 消息处理端点
 ```
-POST http://localhost:3000/messages
+POST http://localhost:8000/messages
 Content-Type: application/json
 ```
 发送 MCP JSON-RPC 请求
@@ -139,7 +139,7 @@ Content-Type: application/json
 
 **1. 列出可用工具**
 ```bash
-curl -X POST http://localhost:3000/messages \
+curl -X POST http://localhost:8000/messages \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -150,7 +150,7 @@ curl -X POST http://localhost:3000/messages \
 
 **2. 加载数据**
 ```bash
-curl -X POST http://localhost:3000/messages \
+curl -X POST http://localhost:8000/messages \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -168,7 +168,7 @@ curl -X POST http://localhost:3000/messages \
 
 **3. 获取数据描述**
 ```bash
-curl -X POST http://localhost:3000/messages \
+curl -X POST http://localhost:8000/messages \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -191,7 +191,7 @@ curl -X POST http://localhost:3000/messages \
 {
   "mcpServers": {
     "data-analysis": {
-      "url": "http://localhost:3000/sse",
+      "url": "http://localhost:8000/sse",
       "transport": "sse"
     }
   }

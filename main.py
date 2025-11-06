@@ -502,13 +502,13 @@ async def messages_endpoint(request: Request):
 
 if __name__ == "__main__":
     print("🚀 启动 Data Analysis MCP Server (SSE 模式)")
-    print("📡 SSE Endpoint: http://localhost:3000/sse")
-    print("📨 Messages Endpoint: http://localhost:3000/messages")
-    print("📖 API Docs: http://localhost:3000/docs")
+    print("📡 SSE Endpoint: http://localhost:8000/sse")
+    print("📨 Messages Endpoint: http://localhost:8000/messages")
+    print("📖 API Docs: http://localhost:8000/docs")
     
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=3000,
+        port=8000,
         log_level="info"
     )
