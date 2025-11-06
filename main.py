@@ -500,7 +500,8 @@ async def messages_endpoint(request: Request):
     return await message_endpoint(request)
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the MCP server"""
     print("🚀 启动 Data Analysis MCP Server (SSE 模式)")
     print("📡 SSE Endpoint: http://localhost:8000/sse")
     print("📨 Messages Endpoint: http://localhost:8000/messages")
@@ -512,3 +513,7 @@ if __name__ == "__main__":
         port=8000,
         log_level="info"
     )
+
+
+if __name__ == "__main__":
+    main()

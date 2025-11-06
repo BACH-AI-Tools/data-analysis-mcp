@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="bachai-data-analysis-mcp",
-    version="1.1.2",
+    version="1.1.3",
     author="BACH Studio",
     author_email="contact@bachstudio.com",
     description="Data Analysis MCP Server - Model Context Protocol server for data analysis with SSE transport",
@@ -32,4 +32,9 @@ setup(
         "sse-starlette>=1.8.0",
         "httpx>=0.25.0",
     ],
+    entry_points={
+        "console_scripts": [
+            "bachai-data-analysis-mcp=main:main",
+        ],
+    },
 )
