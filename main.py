@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-数据分析 MCP 服务器
+数据分析 MCP 服务器 - SSE 传输模式
 """
 
-import sys
 import json
-import io
+import asyncio
 from typing import Any, Dict, Optional
 import pandas as pd
 import numpy as np
@@ -13,8 +12,31 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from sse_starlette.sse import EventSourceResponse
+import uvicorn
+from collections import defaultdict
+import uuid
+
 # 存储加载的数据集
 loaded_datasets: Dict[str, pd.DataFrame] = {}
+
+# 存储待处理的消息队列（用于 SSE 通信）
+message_queues: Dict[str, asyncio.Queue] = {}
+response_queues: Dict[str, asyncio.Queue] = {}
+
+app = FastAPI(title="Data Analysis MCP Server")
+
+# 添加 CORS 支持
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class DataAnalysisMcpServer:
@@ -23,18 +45,6 @@ class DataAnalysisMcpServer:
             "name": "data-analysis-mcp",
             "version": "1.0.0"
         }
-    
-    def start(self):
-        """启动服务器"""
-        print("Data Analysis MCP Server 启动中...", file=sys.stderr)
-        
-        for line in sys.stdin:
-            try:
-                request = json.loads(line)
-                response = self.handle_request(request)
-                print(json.dumps(response), flush=True)
-            except Exception as e:
-                print(f"错误: {e}", file=sys.stderr)
     
     def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """处理请求"""
@@ -387,7 +397,118 @@ class DataAnalysisMcpServer:
         return output
 
 
-if __name__ == "__main__":
-    server = DataAnalysisMcpServer()
-    server.start()
+# 创建全局服务器实例
+mcp_server = DataAnalysisMcpServer()
 
+
+@app.get("/")
+async def root():
+    """根路径，返回服务器信息"""
+    return {
+        "name": "Data Analysis MCP Server",
+        "version": "1.0.0",
+        "transport": "SSE",
+        "endpoints": {
+            "sse": "/sse",
+            "messages": "/message"
+        }
+    }
+
+
+@app.get("/sse")
+async def sse_endpoint(request: Request):
+    """SSE 端点 - 用于建立 SSE 连接并接收服务器消息"""
+    session_id = str(uuid.uuid4())
+    response_queue = asyncio.Queue()
+    response_queues[session_id] = response_queue
+    
+    async def event_generator():
+        """生成 SSE 事件"""
+        try:
+            # 发送 endpoint 事件，告诉客户端消息发送地址
+            yield {
+                "event": "endpoint",
+                "data": f"/message?sessionId={session_id}"
+            }
+            
+            # 持续发送队列中的响应
+            while True:
+                if await request.is_disconnected():
+                    break
+                
+                try:
+                    # 等待响应消息，带超时
+                    response = await asyncio.wait_for(
+                        response_queue.get(),
+                        timeout=30.0
+                    )
+                    
+                    # 发送消息事件
+                    yield {
+                        "event": "message",
+                        "data": json.dumps(response)
+                    }
+                except asyncio.TimeoutError:
+                    # 超时发送心跳
+                    continue
+                    
+        except asyncio.CancelledError:
+            pass
+        finally:
+            # 清理会话
+            if session_id in response_queues:
+                del response_queues[session_id]
+    
+    return EventSourceResponse(event_generator())
+
+
+@app.post("/message")
+async def message_endpoint(request: Request, sessionId: str = None):
+    """处理 MCP 消息请求"""
+    try:
+        body = await request.json()
+        response = mcp_server.handle_request(body)
+        
+        # 如果有 sessionId，通过 SSE 返回
+        if sessionId and sessionId in response_queues:
+            await response_queues[sessionId].put(response)
+            return Response(status_code=202)  # Accepted
+        
+        # 否则直接返回 JSON 响应
+        return JSONResponse(content=response)
+        
+    except Exception as e:
+        error_response = {
+            "jsonrpc": "2.0",
+            "error": {
+                "code": -32700,
+                "message": f"Parse error: {str(e)}"
+            }
+        }
+        
+        if sessionId and sessionId in response_queues:
+            await response_queues[sessionId].put(error_response)
+            return Response(status_code=202)
+        
+        return JSONResponse(content=error_response)
+
+
+# 兼容旧的 /messages 端点
+@app.post("/messages")
+async def messages_endpoint(request: Request):
+    """处理 MCP 消息请求（兼容端点）"""
+    return await message_endpoint(request)
+
+
+if __name__ == "__main__":
+    print("🚀 启动 Data Analysis MCP Server (SSE 模式)")
+    print("📡 SSE Endpoint: http://localhost:3000/sse")
+    print("📨 Messages Endpoint: http://localhost:3000/messages")
+    print("📖 API Docs: http://localhost:3000/docs")
+    
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=3000,
+        log_level="info"
+    )

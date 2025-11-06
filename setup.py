@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="mcp-data-analysis-server",
+    name="bachai-data-analysis-mcp",
     version="1.0.0",
     author="BACH Studio",
     author_email="contact@bachstudio.com",
