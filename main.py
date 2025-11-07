@@ -500,12 +500,33 @@ async def messages_endpoint(request: Request):
     return await message_endpoint(request)
 
 
-def main():
-    """Main entry point for the MCP server"""
-    print("🚀 启动 Data Analysis MCP Server (SSE 模式)")
-    print("📡 SSE Endpoint: http://localhost:8000/sse")
-    print("📨 Messages Endpoint: http://localhost:8000/messages")
-    print("📖 API Docs: http://localhost:8000/docs")
+def main_stdio():
+    """Main entry point for stdio mode (for supergateway/Claude Desktop)"""
+    import sys
+    
+    print("🚀 启动 Data Analysis MCP Server (stdio 模式)", file=sys.stderr)
+    
+    # 创建服务器实例（不使用全局的）
+    server = DataAnalysisMcpServer()
+    
+    # 从 stdin 读取请求，向 stdout 发送响应
+    for line in sys.stdin:
+        try:
+            request = json.loads(line)
+            response = server.handle_request(request)
+            print(json.dumps(response), flush=True)
+        except Exception as e:
+            print(f"错误: {e}", file=sys.stderr)
+
+
+def main_sse():
+    """Main entry point for SSE mode (standalone HTTP server)"""
+    import sys
+    
+    print("🚀 启动 Data Analysis MCP Server (SSE 模式)", file=sys.stderr)
+    print("📡 SSE Endpoint: http://localhost:8000/sse", file=sys.stderr)
+    print("📨 Messages Endpoint: http://localhost:8000/messages", file=sys.stderr)
+    print("📖 API Docs: http://localhost:8000/docs", file=sys.stderr)
     
     uvicorn.run(
         app,
@@ -515,5 +536,11 @@ def main():
     )
 
 
+def main():
+    """Main entry point - defaults to stdio mode for compatibility"""
+    main_stdio()
+
+
 if __name__ == "__main__":
-    main()
+    # 当直接运行时，使用 SSE 模式
+    main_sse()

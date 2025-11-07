@@ -33,8 +33,27 @@ pip install -r requirements.txt
 
 ### 运行服务器
 
+#### 方式 1: stdio 模式（用于 supergateway/Claude Desktop）
+
 ```bash
+# 使用 uvx (推荐)
+uvx bachai-data-analysis-mcp
+
+# 或使用 pip 安装后运行
+pip install bachai-data-analysis-mcp
+bachai-data-analysis-mcp
+```
+
+stdio 模式通过标准输入输出进行通信，适合与 supergateway 或 Claude Desktop 集成。
+
+#### 方式 2: SSE 模式（独立 HTTP 服务器）
+
+```bash
+# 直接运行
 python main.py
+
+# 或使用命令
+bachai-data-analysis-mcp-sse
 ```
 
 服务器将在 `http://localhost:8000` 启动。
