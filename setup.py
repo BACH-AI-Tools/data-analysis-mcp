@@ -1,20 +1,20 @@
 """Setup script for data-analysis-mcp"""
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="bachai-data-analysis-mcp",
-    version="1.1.5",
+    version="1.1.6",
     author="BACH Studio",
     author_email="contact@bachstudio.com",
     description="Data Analysis MCP Server - Model Context Protocol server for data analysis (stdio and SSE modes)",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/BACH-AI-Tools/data-analysis-mcp",
-    packages=find_packages(),
+    py_modules=["main"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

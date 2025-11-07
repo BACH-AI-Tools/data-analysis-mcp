@@ -48,7 +48,7 @@ class DataAnalysisMcpServer:
         
         self.server_info = {
             "name": "data-analysis-mcp",
-            "version": "1.1.5"
+            "version": "1.1.6"
         }
     
     def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
@@ -428,7 +428,7 @@ def _create_sse_app():
         """根路径，返回服务器信息"""
         return {
             "name": "Data Analysis MCP Server",
-            "version": "1.1.5",
+            "version": "1.1.6",
             "transport": "SSE",
             "endpoints": {
                 "sse": "/sse",
