@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="bachai-data-analysis-mcp",
-    version="1.1.4",
+    version="1.1.5",
     author="BACH Studio",
     author_email="contact@bachstudio.com",
     description="Data Analysis MCP Server - Model Context Protocol server for data analysis (stdio and SSE modes)",
